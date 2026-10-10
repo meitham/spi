@@ -47,6 +47,9 @@ void pyDictToObjectMap(
     if (!PyDict_Check(dict))
         SPI_THROW_RUNTIME_ERROR("dict is not a Python dictionary");
 
+    PyObjectSP snapshot = pyoShare(PyDict_Copy(dict));
+    if (!snapshot) throw PyException();
+    dict = snapshot.get();
     PyObject *key, *value;
     Py_ssize_t pos = 0;
 
@@ -69,7 +72,7 @@ PyObjectSP pyObjectMapToDict(
     spi::MapSP m = objectMap->ExportMap();
 
     PyObject* dict = PyDict_New();
-    PyObjectSP output(dict);
+    PyObjectSP output = pyoShare(dict);
 
     const std::vector<std::string>& fieldNames = m->FieldNames();
     for (auto iter = fieldNames.begin(); iter != fieldNames.end(); ++iter)
@@ -91,9 +94,8 @@ void pyObjectToMap(PyObject* self, IObjectMap* objectMap, bool publicOnly)
     // for this routine to work we must not only provide to_dict method in the class
     // but also to have registered the Python class with SPI
 
-    ObjectTypeSP objectType = PythonService::FindRegisteredPythonClass(self->ob_type);
-
     PyInterpreterLock lock;
+    ObjectTypeSP objectType = PythonService::FindRegisteredPythonClass(Py_TYPE(self));
     PyObjectSP the_method = spi::pyoShare(PyObject_GetAttrString(self, "to_dict"));
     if (!the_method)
         spi::pyPythonExceptionHandler();

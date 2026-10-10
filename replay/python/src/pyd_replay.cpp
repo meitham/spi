@@ -43,11 +43,13 @@ static spi_boost::shared_ptr<spi::PythonService> theService;
 
 spi::FunctionCaller* get_function_caller(const char* name)
 {
+    spi::PyBridgeLock bridgeLock;
     return theService->GetFunctionCaller(name);
 }
 
 spi::InputContext* get_input_context()
 {
+    spi::PyBridgeLock bridgeLock;
     return theService->GetInputContext();
 }
 
@@ -62,42 +64,49 @@ extern "C"
 PyObject* py_spi_replay_help_func(
     PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     return theService->HelpFunc(args);
 }
 
 PyObject* py_spi_replay_help_enum(
     PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     return theService->HelpEnum(args);
 }
 
 PyObject* py_spi_replay_object_coerce(
     PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     return theService->ObjectCoerce(args);
 }
 
 PyObject* py_spi_replay_start_timing(
     PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     return theService->StartTiming();
 }
 
 PyObject* py_spi_replay_stop_timing(
     PyObject*self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     return theService->StopTiming();
 }
 
 PyObject* py_spi_replay_clear_timings(
     PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     return theService->ClearTimings();
 }
 
 PyObject* py_spi_replay_get_timings(
     PyObject*self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     return theService->GetTimings();
 }
 
@@ -108,13 +117,22 @@ PyObject* py_spi_replay_get_timings(
 ** Standard Python initialisation function.
 ***************************************************************************
 */
-#if PY_MAJOR_VERSION >= 3
+#ifdef Py_TARGET_ABI3T
+static int exec_module(PyObject* module)
+#elif PY_MAJOR_VERSION >= 3
 PyObject* PyInit_py_replay(void)
 #else
 void initpy_replay(void)
 #endif
 {
+    spi::PyBridgeLock bridgeLock;
   try {
+#ifdef Py_TARGET_ABI3T
+    if (theService) {
+        PyErr_SetString(PyExc_ImportError, "SPI modules can only be loaded once per process");
+        return -1;
+    }
+#endif
     spi::CommonRuntime::AddContext("PYTHON");
     theService.reset(new spi::PythonService("py_replay", spi_replay::replay_exported_service()));
     spi::PythonService* svc = theService.get();
@@ -169,26 +187,50 @@ void initpy_replay(void)
     py_spi_replay_map_update_functions(svc);
     py_spi_replay_replay_update_functions(svc);
 
+#ifdef Py_TARGET_ABI3T
+    svc->RegisterFunctions(module);
+    return 0;
+#else
     svc->RegisterFunctions();
 #if PY_MAJOR_VERSION >= 3
     PyObject* module = svc->GetPythonModule();
     return module;
 #endif
+#endif
   }
   catch (std::exception& e)
   {
     spi::pyExceptionHandler(e.what());
-#if PY_MAJOR_VERSION >= 3
+#ifdef Py_TARGET_ABI3T
+    return -1;
+#elif PY_MAJOR_VERSION >= 3
     return NULL;
 #endif
   }
   catch (...)
   {
     spi::pyExceptionHandler("Unknown exception");
-#if PY_MAJOR_VERSION >= 3
+#ifdef Py_TARGET_ABI3T
+    return -1;
+#elif PY_MAJOR_VERSION >= 3
     return NULL;
 #endif
   }
 }
 
+#ifdef Py_TARGET_ABI3T
+PyABIInfo_VAR(abi_info);
+static PySlot module_slots[] = {
+    PySlot_PTR_STATIC(Py_mod_abi, &abi_info),
+    PySlot_PTR_STATIC(Py_mod_name, "py_replay"),
+    PySlot_PTR(Py_mod_exec, exec_module),
+    PySlot_PTR(Py_mod_gil, Py_MOD_GIL_NOT_USED),
+    PySlot_PTR(Py_mod_multiple_interpreters, Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED),
+    PySlot_END
+};
+PyMODEXPORT_FUNC PyModExport_py_replay(void)
+{
+    return module_slots;
+}
+#endif
 

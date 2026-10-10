@@ -177,14 +177,14 @@ G_INSTALL_DLL_PFX:=lib
 # for the mac we use .so for the actual extension
 # so this should be correct for linux and macos
 
-G_INSTALL_PYD_EXT:=.so
+G_INSTALL_PYD_EXT:=$(if $(filter 3-abi3t,$(G_PY_VERSION)),.abi3t.so,.so)
 G_INSTALL_PYD_PFX:=
 
 # we need to define this after defining the DLLs needed
 # this definition will ensure that dll.mk will build .so
 # file instead of .dylib file (for the mac)
 
-G_DLL_EXT:=$(G_DEBUG_EXT).so
+G_DLL_EXT:=$(G_DEBUG_EXT)$(G_INSTALL_PYD_EXT)
 
 endif
 

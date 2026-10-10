@@ -34,7 +34,7 @@ endif
 
 G_DLL_LFLAGS = $(I_LFLAGS) $(I_DLL_LFLAGS)
 G_DLL_LFLAGS += -rpath @loader_path
-G_EXE_LFLAGS = $(I_LFLAGS) 
+G_EXE_LFLAGS = $(I_LFLAGS) -rpath @loader_path
 
 ############################################################################
 # Standard system libraries

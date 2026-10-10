@@ -3,22 +3,17 @@ No description
 """
 
 import os
-cwd = os.getcwd()
+_dll_dir = (os.add_dll_directory(os.path.dirname(os.path.abspath(__file__)))
+            if hasattr(os, 'add_dll_directory') else None)
 try:
-    fn = os.path.abspath(__file__)
-    dn = os.path.dirname(fn)
-    os.chdir(dn)
-
-    if os.path.basename(fn).startswith("__init__.py"):
+    if __package__:
         from .py_replay import *
     else:
         from py_replay import *
-finally: os.chdir(cwd)
+finally:
+    if _dll_dir is not None: _dll_dir.close()
+del os, _dll_dir
 
-del(os)
-del(cwd)
-del(fn)
-del(dn)
 
 import sys
 class TestGenerator(ReplayCodeGenerator):

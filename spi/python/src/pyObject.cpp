@@ -44,21 +44,41 @@
 ***************************************************************************
 */
 
+namespace {
+#ifdef Py_TARGET_ABI3T
+    struct SpiPyObjectData { const SpiObject* obj; };
+    const SpiObject*& objectValue(SpiPyObject* pyo)
+    {
+        return static_cast<SpiPyObjectData*>(PyObject_GetTypeData(
+            pyo, SpiPyObjectType()))->obj;
+    }
+#else
+    const SpiObject*& objectValue(SpiPyObject* pyo) { return pyo->obj; }
+#endif
+}
+
+void spi_py_object_assign(SpiPyObject* pyo, const SpiObject* obj)
+{
+    spi::PyBridgeLock bridgeLock;
+    const SpiObject* previous = objectValue(pyo);
+    objectValue(pyo) = obj;
+    spi::decRefCount(previous);
+}
+
 /* tp_dealloc function */
 void spi_py_object_dealloc (SpiPyObject *pyo)
 {
-    if (pyo)
-    {
-        if (pyo->obj)
-        {
-            decRefCount(pyo->obj);
-            PyObject_Del(pyo);
-        }
-    }
+    spi::PyBridgeLock bridgeLock;
+    PyTypeObject* type = Py_TYPE((PyObject*)pyo);
+    spi::decRefCount(objectValue(pyo));
+    freefunc free_object = (freefunc)PyType_GetSlot(type, Py_tp_free);
+    free_object(pyo);
+    Py_DECREF((PyObject*)type);
 }
 
 PyObject* spi_py_object_getter (SpiPyObject* pyo, char* name)
 {
+    spi::PyBridgeLock bridgeLock;
     // note that if we have sub-classed spi.Object (directly or indirectly) in Python
     // then we only get as far as this routine if the name is not defined in the
     // object's dictionary
@@ -81,23 +101,24 @@ PyObject* spi_py_object_getter (SpiPyObject* pyo, char* name)
 
 int spi_py_object_setter (SpiPyObject* pyo, PyObject* value, char* name)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
 
-        if (pyo->obj)
+        if (objectValue(pyo))
         {
             // this operation creates a new spi::Object on success
             spi::ObjectConstSP obj = spi::ObjectPut(
-                spi::ObjectConstSP(pyo->obj), name,
+                spi::ObjectConstSP(objectValue(pyo)), name,
                 spi::pyoToValue(value), svc->GetInputContext());
 
             // we put the newly created spi::Object back into the SpiPyObject
             // but since we are dealing with raw pointers we need to increment
             // and decrement the reference counts explicitly
             const spi::Object* pobj = spi::incRefCount(obj.get());
-            spi::decRefCount(pyo->obj);
-            pyo->obj = pobj;
+            spi::decRefCount(objectValue(pyo));
+            objectValue(pyo) = pobj;
         }
         else
         {
@@ -113,7 +134,7 @@ int spi_py_object_setter (SpiPyObject* pyo, PyObject* value, char* name)
             // attribute 'typename' of 'spi.Object' objects is not writable
             //
             // this is also very re-assuring behaviour
-            SPI_THROW_RUNTIME_ERROR("pyo->obj undefined");
+            SPI_THROW_RUNTIME_ERROR("objectValue(pyo) undefined");
         }
 
         return 0;
@@ -133,6 +154,7 @@ int spi_py_object_setter (SpiPyObject* pyo, PyObject* value, char* name)
 // hence we do it in place rather than via ObjectPut which is quite an overhead
 int spi_py_object_map_setter(SpiPyObject* pyo, PyObject* value, char* name)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         SPI_NOT_IMPLEMENTED;
@@ -141,15 +163,15 @@ int spi_py_object_map_setter(SpiPyObject* pyo, PyObject* value, char* name)
 
         //// this operation creates a new spi::Object on success
         //spi::ObjectConstSP obj = spi::ObjectPut(
-        //    spi::ObjectConstSP(pyo->obj), name,
+        //    spi::ObjectConstSP(objectValue(pyo)), name,
         //    spi::pyoToValue(value), svc->GetInputContext());
 
         //// we put the newly created spi::Object back into the SpiPyObject
         //// but since we are dealing with raw pointers we need to increment
         //// and decrement the reference counts explicitly
         //const spi::Object* pobj = spi::incRefCount(obj.get());
-        //spi::decRefCount(pyo->obj);
-        //pyo->obj = pobj;
+        //spi::decRefCount(objectValue(pyo));
+        //objectValue(pyo) = pobj;
 
         //return 0;
     }
@@ -166,6 +188,7 @@ int spi_py_object_map_setter(SpiPyObject* pyo, PyObject* value, char* name)
 
 PyObject* spi_py_object_getattro(SpiPyObject* pyo, PyObject* name)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         // use generic method (will find methods and static attributes)
@@ -181,7 +204,7 @@ PyObject* spi_py_object_getattro(SpiPyObject* pyo, PyObject* name)
         // returns NULL if name is not a string
         std::string cName = spi::pyoToString(name);
 
-        spi::Value value = spi::ObjectGet(pyo->obj, cName.c_str());
+        spi::Value value = spi::ObjectGet(objectValue(pyo), cName.c_str());
         return pyoFromValue(value);
     }
     catch (spi::PyException&)
@@ -197,6 +220,7 @@ PyObject* spi_py_object_getattro(SpiPyObject* pyo, PyObject* name)
 
 PyObject* spi_py_object_get (PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
@@ -215,6 +239,7 @@ PyObject* spi_py_object_get (PyObject* self, PyObject* args)
 
 PyObject* spi_py_object_put (PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
@@ -233,6 +258,7 @@ PyObject* spi_py_object_put (PyObject* self, PyObject* args)
 
 PyObject* spi_py_object_set_meta_data(SpiPyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         std::vector<spi::Value> inputs = spi::pyTupleToValueVector(
@@ -240,8 +266,8 @@ PyObject* spi_py_object_set_meta_data(SpiPyObject* self, PyObject* args)
 
         const std::string& name = inputs[0].getString();
 
-        self->obj->get_meta_data()->SetValue(name, inputs[1]);
-        self->obj->get_meta_data()->SetClassName("Map"); // just in case
+        objectValue(self)->get_meta_data()->SetValue(name, inputs[1]);
+        objectValue(self)->get_meta_data()->SetClassName("Map"); // just in case
 
         PyObject* out = (PyObject*)self; // support a fluent interface
         spi::PYO_INCREF(out);
@@ -259,6 +285,7 @@ PyObject* spi_py_object_set_meta_data(SpiPyObject* self, PyObject* args)
 
 PyObject* spi_py_object_copy(PyObject* self)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         return spi::PythonService::ObjectCopy(self, false);
@@ -275,6 +302,7 @@ PyObject* spi_py_object_copy(PyObject* self)
 
 PyObject* spi_py_object_deepcopy(PyObject* self, PyObject* ignored)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         return spi::PythonService::ObjectCopy(self, true);
@@ -316,6 +344,7 @@ void investigate_null_object(PyObject* pyo)
 
 PyObject* spi_py_object_to_string(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
@@ -333,6 +362,7 @@ PyObject* spi_py_object_to_string(PyObject* self, PyObject* args)
 
 PyObject* spi_py_object_to_file(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
@@ -350,6 +380,7 @@ PyObject* spi_py_object_to_file(PyObject* self, PyObject* args)
 
 PyObject* spi_py_object_from_string(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
@@ -367,6 +398,7 @@ PyObject* spi_py_object_from_string(PyObject* self, PyObject* args)
 
 PyObject* spi_py_object_from_file(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
@@ -384,6 +416,7 @@ PyObject* spi_py_object_from_file(PyObject* self, PyObject* args)
 
 PyObject* spi_py_object_sha_1(PyObject* self)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
@@ -401,6 +434,7 @@ PyObject* spi_py_object_sha_1(PyObject* self)
 
 PyObject* spi_py_object_sha_256(PyObject* self)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
@@ -418,6 +452,7 @@ PyObject* spi_py_object_sha_256(PyObject* self)
 
 PyObject* spi_py_object_register_class(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
         spi::PythonService* svc = spi::PythonService::CommonService();
@@ -436,12 +471,13 @@ PyObject* spi_py_object_register_class(PyObject* self, PyObject* args)
 
 static PyObject* spi_py_object_reduce(SpiPyObject* self)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
-        if (!self->obj)
+        if (!objectValue(self))
             investigate_null_object((PyObject*)self);
 
-        spi::ObjectConstSP object(self->obj);
+        spi::ObjectConstSP object(objectValue(self));
 
         std::string output = object->to_string("", "ACC;NOINDENT");
         const spi::Service* svc = object->get_service();
@@ -488,12 +524,13 @@ static PyObject* spi_py_object_reduce(SpiPyObject* self)
 
 static PyObject* spi_py_object_as_value(SpiPyObject* self)
 {
+    spi::PyBridgeLock bridgeLock;
     try
     {
-        if (!self->obj)
+        if (!objectValue(self))
             investigate_null_object((PyObject*)self);
 
-        spi::ObjectConstSP object(self->obj);
+        spi::ObjectConstSP object(objectValue(self));
         spi::Value value = object->as_value();
 
         if (value.getType() == spi::Value::UNDEFINED)
@@ -640,10 +677,10 @@ const Object* pyInitConstObject(PyObject* args, FunctionCaller* func, ObjectType
 
 ObjectConstSP spiPyObjectGetObject(SpiPyObject* pyo)
 {
-    // usual case is that pyo->obj is defined
-    if (pyo->obj)
+    // usual case is that objectValue(pyo) is defined
+    if (objectValue(pyo))
     {
-        return ObjectConstSP(pyo->obj);
+        return ObjectConstSP(objectValue(pyo));
     }
 
     // this is a temporary object - it might own the PyObject but it will go
@@ -737,7 +774,11 @@ PyTypeObject* pyMakeTypeObject(
     PyType_Spec spec = 
     {
         className,
+#ifdef Py_TARGET_ABI3T
+        tp_base ? 0 : -int(sizeof(SpiPyObjectData)),
+#else
         sizeof(SpiPyObject),
+#endif
         0,
         flags,
         slots.data()

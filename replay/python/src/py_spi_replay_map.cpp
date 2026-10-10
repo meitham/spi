@@ -41,6 +41,7 @@
 
 PyObject* py_spi_replay_MapClassName(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "MapClassName");
     try
@@ -68,6 +69,7 @@ PyObject* py_spi_replay_MapClassName(PyObject* self, PyObject* args, PyObject* k
 
 PyObject* py_spi_replay_MapFieldNames(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "MapFieldNames");
     try
@@ -95,6 +97,7 @@ PyObject* py_spi_replay_MapFieldNames(PyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spi_replay_MapRef(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "MapRef");
     try
@@ -122,6 +125,7 @@ PyObject* py_spi_replay_MapRef(PyObject* self, PyObject* args, PyObject* kwargs)
 
 PyObject* py_spi_replay_MapGetValue(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "MapGetValue");
     try

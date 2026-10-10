@@ -63,6 +63,7 @@ static int py_spi_replay_ReplayAction_init(SpiPyObject* self, PyObject* args, Py
 
 PyObject* py_spi_replay_ReplayAction_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("ReplayAction", args);
     return pyo;
 }
@@ -96,6 +97,7 @@ static PyTypeObject* ReplayAction_PyObjectType()
 
 static int py_spi_replay_ReplayFunctionAction_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ReplayFunctionAction");
     try
@@ -103,7 +105,7 @@ static int py_spi_replay_ReplayFunctionAction_init(SpiPyObject* self, PyObject* 
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spi_replay::ReplayFunctionAction::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spi_replay::ReplayFunctionAction::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -124,6 +126,7 @@ static int py_spi_replay_ReplayFunctionAction_init(SpiPyObject* self, PyObject* 
 
 PyObject* py_spi_replay_ReplayFunctionAction_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("ReplayFunctionAction", args);
     return pyo;
 }
@@ -166,6 +169,7 @@ static PyTypeObject* ReplayFunctionAction_PyObjectType()
 
 static int py_spi_replay_ReplayObjectAction_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ReplayObjectAction");
     try
@@ -173,7 +177,7 @@ static int py_spi_replay_ReplayObjectAction_init(SpiPyObject* self, PyObject* ar
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spi_replay::ReplayObjectAction::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spi_replay::ReplayObjectAction::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -194,6 +198,7 @@ static int py_spi_replay_ReplayObjectAction_init(SpiPyObject* self, PyObject* ar
 
 PyObject* py_spi_replay_ReplayObjectAction_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("ReplayObjectAction", args);
     return pyo;
 }
@@ -342,12 +347,14 @@ static int py_spi_replay_ReplayCodeGenerator_init(SpiPyObject* self, PyObject* a
 
 PyObject* py_spi_replay_ReplayCodeGenerator_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("ReplayCodeGenerator", args);
     return pyo;
 }
 
 PyObject* py_spi_replay_ReplayCodeGenerator_GenerateFunction(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ReplayCodeGenerator.GenerateFunction");
     try
@@ -375,6 +382,7 @@ PyObject* py_spi_replay_ReplayCodeGenerator_GenerateFunction(PyObject* self, PyO
 
 PyObject* py_spi_replay_ReplayCodeGenerator_GenerateObject(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ReplayCodeGenerator.GenerateObject");
     try
@@ -455,12 +463,14 @@ static int py_spi_replay_ReplayLog_init(SpiPyObject* self, PyObject* args, PyObj
 
 PyObject* py_spi_replay_ReplayLog_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("ReplayLog", args);
     return pyo;
 }
 
 PyObject* py_spi_replay_ReplayLog_generateCode(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ReplayLog.generateCode");
     try
@@ -488,6 +498,7 @@ PyObject* py_spi_replay_ReplayLog_generateCode(PyObject* self, PyObject* args, P
 
 PyObject* py_spi_replay_ReplayLog_Read(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ReplayLog.Read");
     try

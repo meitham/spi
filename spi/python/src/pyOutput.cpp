@@ -299,15 +299,14 @@ PyObject* pyoFromObject(const ObjectConstSP& value)
     if (!value)
         Py_RETURN_NONE;
 
-    SpiPyObject* pyo = PyObject_New(SpiPyObject, SpiPyObjectType());
+    SpiPyObject* pyo = (SpiPyObject*)PyType_GenericAlloc(SpiPyObjectType(), 0);
     if (!pyo)
     {
         PyErr_Format(PyExc_MemoryError, "Could not create Object.");
         throw PyException();
     }
 
-    pyo->obj = value.get();
-    pyo->obj->incRefCount();
+    spi_py_object_assign(pyo, spi::incRefCount(value.get()));
 
     return (PyObject*)pyo;
 }

@@ -35,7 +35,7 @@ endif
 endif
 endif
 ifeq ($(G_PLATFORM),macos64)
-	install_name_tool -id @loader_path/$(notdir $(I_TARGET)) $(I_TARGET)
+	install_name_tool -id @rpath/$(notdir $(I_TARGET)) $(I_TARGET)
 endif
 
 ############################################################################

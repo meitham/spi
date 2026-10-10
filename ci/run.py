@@ -44,7 +44,8 @@ def configuration(python_tag):
         sdk = latest_directory(kits / '10/Include')
         args += ['COMPILER=msvc17', f'G_VS17_PACKAGE_TYPE={vs.name}',
                  f'G_VS17_TOOLS_VERSION={tools.name}', f'G_VS17_KITS_VERSION={sdk.name}',
-                 f'G_PYTHON_LIBS={Path(sys.base_prefix).as_posix()}/libs/python{tag}.lib']
+                 f'G_PYTHON_LIBS={Path(sys.base_prefix).as_posix()}/libs/python'
+                 + {'3-abi': '3', '3-abi3t': '3t'}.get(tag, tag) + '.lib']
         abi = 'Release'
     else:
         args.append('SHELL=/bin/sh -e')
@@ -164,7 +165,10 @@ def main():
             if not built or not run(source.stem, [str(executable)], 120, cwd=test_dir, env=test_env):
                 failures.append(source.stem)
     if not run('python-smoke', [sys.executable, str(ROOT / 'ci/python_smoke.py'),
-                                '--root', str(ROOT), '--abi', abi, '--python-tag', tag], 60):
+                                '--root', str(ROOT), '--abi', abi, '--python-tag', tag,
+                                '--thread-tests',
+                                *(['--require-free-threaded'] if tag == '3-abi3t'
+                                  and sysconfig.get_config_var('Py_GIL_DISABLED') else [])], 180):
         failures.append('python-smoke')
     summary = {'failed': failures, 'native_test_programs': len(list((ROOT / 'test').glob('test*.cpp'))),
                'python': sys.version, 'platform': sys.platform, 'abi': abi, 'python_tag': tag}

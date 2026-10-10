@@ -183,11 +183,13 @@ Value pyoToValue(PyObject* pyo)
     }
     else if (PyList_Check(pyo))
     {
-        Py_ssize_t size = PyList_Size(pyo);
+        PyObjectSP snapshot = pyoShare(PySequence_Tuple(pyo));
+        if (!snapshot) throw PyException();
+        Py_ssize_t size = PyTuple_Size(snapshot.get());
         std::vector<Value> values;
         for (Py_ssize_t i = 0; i < size; ++i)
         {
-            PyObject* item  = PyList_GetItem(pyo, i);
+            PyObject* item  = PyTuple_GetItem(snapshot.get(), i);
             if (!item)
                 throw PyException();
             values.push_back(pyoToValue(item));
@@ -241,9 +243,13 @@ namespace
         PyObject* self)
     {
         InputValues iv(func->name);
+        PyObjectSP keywordSnapshot;
 
         if (kwargs)
         {
+            keywordSnapshot = pyoShare(PyDict_Copy(kwargs));
+            if (!keywordSnapshot) throw PyException();
+            kwargs = keywordSnapshot.get();
             // use of kwargs is for the convenience of the Python developer
             // this section of code is not really particularly efficient
 

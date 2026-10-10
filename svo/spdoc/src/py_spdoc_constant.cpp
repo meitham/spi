@@ -63,12 +63,14 @@ static int py_spdoc_Constant_init(SpiPyObject* self, PyObject* args, PyObject* k
 
 PyObject* py_spdoc_Constant_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("Constant", args);
     return pyo;
 }
 
 PyObject* py_spdoc_Constant_typeName(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Constant.typeName");
     try
@@ -96,6 +98,7 @@ PyObject* py_spdoc_Constant_typeName(PyObject* self, PyObject* args, PyObject* k
 
 PyObject* py_spdoc_Constant_docString(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Constant.docString");
     try
@@ -123,6 +126,7 @@ PyObject* py_spdoc_Constant_docString(PyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spdoc_Constant_getInt(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Constant.getInt");
     try
@@ -150,6 +154,7 @@ PyObject* py_spdoc_Constant_getInt(PyObject* self, PyObject* args, PyObject* kwa
 
 PyObject* py_spdoc_Constant_getDate(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Constant.getDate");
     try
@@ -177,6 +182,7 @@ PyObject* py_spdoc_Constant_getDate(PyObject* self, PyObject* args, PyObject* kw
 
 PyObject* py_spdoc_Constant_getDateTime(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Constant.getDateTime");
     try
@@ -204,6 +210,7 @@ PyObject* py_spdoc_Constant_getDateTime(PyObject* self, PyObject* args, PyObject
 
 PyObject* py_spdoc_Constant_getDouble(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Constant.getDouble");
     try
@@ -231,6 +238,7 @@ PyObject* py_spdoc_Constant_getDouble(PyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spdoc_Constant_getChar(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Constant.getChar");
     try
@@ -258,6 +266,7 @@ PyObject* py_spdoc_Constant_getChar(PyObject* self, PyObject* args, PyObject* kw
 
 PyObject* py_spdoc_Constant_getString(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Constant.getString");
     try
@@ -285,6 +294,7 @@ PyObject* py_spdoc_Constant_getString(PyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spdoc_Constant_getBool(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Constant.getBool");
     try
@@ -357,6 +367,7 @@ static PyTypeObject* Constant_PyObjectType()
 
 static int py_spdoc_IntConstant_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "IntConstant");
     try
@@ -364,7 +375,7 @@ static int py_spdoc_IntConstant_init(SpiPyObject* self, PyObject* args, PyObject
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::IntConstant::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::IntConstant::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -385,6 +396,7 @@ static int py_spdoc_IntConstant_init(SpiPyObject* self, PyObject* args, PyObject
 
 PyObject* py_spdoc_IntConstant_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("IntConstant", args);
     return pyo;
 }
@@ -426,6 +438,7 @@ static PyTypeObject* IntConstant_PyObjectType()
 
 static int py_spdoc_DateConstant_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "DateConstant");
     try
@@ -433,7 +446,7 @@ static int py_spdoc_DateConstant_init(SpiPyObject* self, PyObject* args, PyObjec
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::DateConstant::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::DateConstant::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -454,6 +467,7 @@ static int py_spdoc_DateConstant_init(SpiPyObject* self, PyObject* args, PyObjec
 
 PyObject* py_spdoc_DateConstant_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("DateConstant", args);
     return pyo;
 }
@@ -495,6 +509,7 @@ static PyTypeObject* DateConstant_PyObjectType()
 
 static int py_spdoc_DateTimeConstant_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "DateTimeConstant");
     try
@@ -502,7 +517,7 @@ static int py_spdoc_DateTimeConstant_init(SpiPyObject* self, PyObject* args, PyO
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::DateTimeConstant::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::DateTimeConstant::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -523,6 +538,7 @@ static int py_spdoc_DateTimeConstant_init(SpiPyObject* self, PyObject* args, PyO
 
 PyObject* py_spdoc_DateTimeConstant_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("DateTimeConstant", args);
     return pyo;
 }
@@ -564,6 +580,7 @@ static PyTypeObject* DateTimeConstant_PyObjectType()
 
 static int py_spdoc_DoubleConstant_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "DoubleConstant");
     try
@@ -571,7 +588,7 @@ static int py_spdoc_DoubleConstant_init(SpiPyObject* self, PyObject* args, PyObj
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::DoubleConstant::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::DoubleConstant::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -592,6 +609,7 @@ static int py_spdoc_DoubleConstant_init(SpiPyObject* self, PyObject* args, PyObj
 
 PyObject* py_spdoc_DoubleConstant_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("DoubleConstant", args);
     return pyo;
 }
@@ -633,6 +651,7 @@ static PyTypeObject* DoubleConstant_PyObjectType()
 
 static int py_spdoc_CharConstant_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "CharConstant");
     try
@@ -640,7 +659,7 @@ static int py_spdoc_CharConstant_init(SpiPyObject* self, PyObject* args, PyObjec
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::CharConstant::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::CharConstant::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -661,6 +680,7 @@ static int py_spdoc_CharConstant_init(SpiPyObject* self, PyObject* args, PyObjec
 
 PyObject* py_spdoc_CharConstant_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("CharConstant", args);
     return pyo;
 }
@@ -702,6 +722,7 @@ static PyTypeObject* CharConstant_PyObjectType()
 
 static int py_spdoc_StringConstant_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "StringConstant");
     try
@@ -709,7 +730,7 @@ static int py_spdoc_StringConstant_init(SpiPyObject* self, PyObject* args, PyObj
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::StringConstant::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::StringConstant::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -730,6 +751,7 @@ static int py_spdoc_StringConstant_init(SpiPyObject* self, PyObject* args, PyObj
 
 PyObject* py_spdoc_StringConstant_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("StringConstant", args);
     return pyo;
 }
@@ -771,6 +793,7 @@ static PyTypeObject* StringConstant_PyObjectType()
 
 static int py_spdoc_BoolConstant_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "BoolConstant");
     try
@@ -778,7 +801,7 @@ static int py_spdoc_BoolConstant_init(SpiPyObject* self, PyObject* args, PyObjec
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::BoolConstant::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::BoolConstant::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -799,6 +822,7 @@ static int py_spdoc_BoolConstant_init(SpiPyObject* self, PyObject* args, PyObjec
 
 PyObject* py_spdoc_BoolConstant_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("BoolConstant", args);
     return pyo;
 }
@@ -840,6 +864,7 @@ static PyTypeObject* BoolConstant_PyObjectType()
 
 static int py_spdoc_UndefinedConstant_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "UndefinedConstant");
     try
@@ -847,7 +872,7 @@ static int py_spdoc_UndefinedConstant_init(SpiPyObject* self, PyObject* args, Py
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::UndefinedConstant::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::UndefinedConstant::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -868,6 +893,7 @@ static int py_spdoc_UndefinedConstant_init(SpiPyObject* self, PyObject* args, Py
 
 PyObject* py_spdoc_UndefinedConstant_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("UndefinedConstant", args);
     return pyo;
 }

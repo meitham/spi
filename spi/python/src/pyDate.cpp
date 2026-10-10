@@ -40,64 +40,14 @@
 #include <spi/Map.hpp>
 
 #ifdef Py_LIMITED_API
-
-/* Define structure for C API. */
-
-// note that DateTime is not part of the Py_LIMITED_API but in practice
-// is considered to be fairly stable - we may need to revisit this in
-// future if this status changes - hence we use the same name as the
-// structure in the regular API so that if there is a change in status
-// of the Py_LIMITED_API in the future we can catch the problem
-
-typedef struct {
-    /* type objects */
-    PyTypeObject* DateType;
-    PyTypeObject* DateTimeType;
-    PyTypeObject* TimeType;
-    PyTypeObject* DeltaType;
-    PyTypeObject* TZInfoType;
-
-    /* singletons */
-    PyObject* TimeZone_UTC;
-
-    /* constructors */
-    PyObject* (*Date_FromDate)(int, int, int, PyTypeObject*);
-    PyObject* (*DateTime_FromDateAndTime)(int, int, int, int, int, int, int,
-        PyObject*, PyTypeObject*);
-    PyObject* (*Time_FromTime)(int, int, int, int, PyObject*, PyTypeObject*);
-    PyObject* (*Delta_FromDelta)(int, int, int, int, PyTypeObject*);
-    PyObject* (*TimeZone_FromTimeZone)(PyObject* offset, PyObject* name);
-
-    /* constructors for the DB API */
-    PyObject* (*DateTime_FromTimestamp)(PyObject*, PyObject*, PyObject*);
-    PyObject* (*Date_FromTimestamp)(PyObject*, PyObject*);
-
-    /* PEP 495 constructors */
-    PyObject* (*DateTime_FromDateAndTimeAndFold)(int, int, int, int, int, int, int,
-        PyObject*, int, PyTypeObject*);
-    PyObject* (*Time_FromTimeAndFold)(int, int, int, int, PyObject*, int, PyTypeObject*);
-
-} PyDateTime_CAPI;
-
-#define PyDateTime_CAPSULE_NAME "datetime.datetime_CAPI"
-
-/* Define global variable for the C API and a macro for setting it. */
-
-static PyDateTime_CAPI* PyDateTimeAPI = NULL;
-#define PyDateTime_IMPORT \
-    PyDateTimeAPI = (PyDateTime_CAPI *)PyCapsule_Import(PyDateTime_CAPSULE_NAME, 0)
-
-#define PyDate_FromDate(year, month, day) \
-    PyDateTimeAPI->Date_FromDate((year), (month), (day), PyDateTimeAPI->DateType)
-
-#define PyDateTime_FromDateAndTime(year, month, day, hour, min, sec, usec) \
-    PyDateTimeAPI->DateTime_FromDateAndTime((year), (month), (day), (hour), \
-        (min), (sec), (usec), Py_None, PyDateTimeAPI->DateTimeType)
-
-#define PyDate_Check(op) PyObject_TypeCheck((op), PyDateTimeAPI->DateType)
-
-#define PyDateTime_Check(op) PyObject_TypeCheck((op), PyDateTimeAPI->DateTimeType)
-
+// datetime's private capsule layout is not part of either Stable ABI.
+static PyObject* dateType = NULL;
+static PyObject* dateTimeType = NULL;
+#define PyDate_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)dateType)
+#define PyDateTime_Check(op) PyObject_TypeCheck(op, (PyTypeObject*)dateTimeType)
+#define PyDate_FromDate(y, m, d) PyObject_CallFunction(dateType, "iii", y, m, d)
+#define PyDateTime_FromDateAndTime(y, m, d, h, min, sec, us) \
+    PyObject_CallFunction(dateTimeType, "iiiiiii", y, m, d, h, min, sec, us)
 #endif
 
 SPI_BEGIN_NAMESPACE
@@ -109,8 +59,12 @@ namespace
     int pyoGetIntAttribute(PyObject* pyo, const char* attr)
     {
         PyObject* v = PyObject_GetAttrString(pyo, attr);
+        if (!v)
+            throw PyException();
         int result = (int)PyLong_AsLong(v);
         PYO_DECREF(v);
+        if (PyErr_Occurred())
+            throw PyException();
         return result;
     }
 #endif
@@ -124,7 +78,18 @@ namespace
 
         if (!imported)
         {
+#ifdef Py_LIMITED_API
+            PyObjectSP module = pyoShare(PyImport_ImportModule("datetime"));
+            if (!module) throw PyException();
+            PyObjectSP date = pyoShare(PyObject_GetAttrString(module.get(), "date"));
+            PyObjectSP datetime = pyoShare(PyObject_GetAttrString(module.get(), "datetime"));
+            if (!date || !datetime) throw PyException();
+            dateType = pyoRelease(date);
+            dateTimeType = pyoRelease(datetime);
+#else
             PyDateTime_IMPORT;
+            if (!PyDateTimeAPI) throw PyException();
+#endif
             imported = true;
         }
     }
@@ -226,8 +191,7 @@ Date pyToDate(PyObject* pyo)
     if (pyIsDate(pyo))
     {
 #ifdef Py_LIMITED_API
-        static PyObject* name = PyUnicode_InternFromString("toordinal");   // cached
-        PyObjectSP r = pyoShare(PyObject_CallMethodObjArgs(pyo, name, nullptr));
+        PyObjectSP r = pyoShare(PyObject_CallMethod(pyo, "toordinal", NULL));
         if (!r)
             throw PyException();
         long ord = PyLong_AsLong(r.get());

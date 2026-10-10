@@ -162,6 +162,18 @@ std::vector<PyObject*> pyArrayToVector(PyObject* const* in, Py_ssize_t nargs);
  * code is invoked by C++ code which might not be in the main thread of a Python
  * process.
  */
+// Serializes the Python bridge's access to the process-wide SPI runtime.
+// Waiting detaches the Python thread state so another thread can acquire the GIL.
+// Recursive entry supports callbacks into SPI on the calling thread.
+class SPI_PY_IMPORT PyBridgeLock
+{
+public:
+    PyBridgeLock();
+    ~PyBridgeLock();
+    PyBridgeLock(const PyBridgeLock&) = delete;
+    PyBridgeLock& operator=(const PyBridgeLock&) = delete;
+};
+
 class SPI_PY_IMPORT PyInterpreterLock
 {
 public:
@@ -170,6 +182,7 @@ public:
 
 private:
     PyGILState_STATE gstate;
+    PyBridgeLock bridgeLock;
 };
 
 void SPI_PY_IMPORT pyGetCaller(

@@ -31,12 +31,13 @@
 ***************************************************************************
 */
 
+#include <Python.h>
+
 #include "DeclSpec.h"
 
 #include <spi_util/ClockUtil.hpp>
 #include <spi/Service.hpp>
 
-#include <Python.h>
 
 #include "pyValue.hpp"
 
@@ -61,7 +62,7 @@ struct PythonNamespace
     const char*              m_ns;
     std::vector<PyMethodDef> m_functions;
     std::vector<PythonClass> m_classes;
-#if PY_MAJOR_VERSION >= 3
+#if PY_MAJOR_VERSION >= 3 && !defined(Py_TARGET_ABI3T)
     PyModuleDef              m_moduleDef;
 #endif
 };
@@ -85,7 +86,7 @@ public:
     /**
      * Register all the functions and classes from the library.
     */
-    void RegisterFunctions();
+    void RegisterFunctions(PyObject* module = NULL);
 
     // void DebugModule(const char* state);
 
@@ -184,7 +185,7 @@ private:
         PyTypeObject* pyo);
 
     static std::map<PyTypeObject*, ObjectTypeSP> g_indexPythonObjectType;
-#if PY_MAJOR_VERSION >= 3
+#if PY_MAJOR_VERSION >= 3 && !defined(Py_TARGET_ABI3T)
     PyModuleDef m_moduleDef;
 #endif
 

@@ -51,22 +51,14 @@ std::vector<T> pyoToVector(
     T (*ToScalar)(PyObject*))
 {
     PyObjectSP pyoArray = pyoShare(
-        PySequence_Fast(pyo, "Not a sequence"));
+        PySequence_Tuple(pyo));
     if (!pyoArray)
         throw PyException();
-#ifdef Py_LIMITED_API
-    Py_ssize_t size = PySequence_Size(pyoArray.get());
-#else
-    Py_ssize_t size = PySequence_Fast_GET_SIZE(pyoArray.get());
-#endif
+    Py_ssize_t size = PyTuple_Size(pyoArray.get());
     std::vector<T> out;
     for (Py_ssize_t i = 0; i < size; ++i)
     {
-#ifdef Py_LIMITED_API
-        PyObject* item = PySequence_GetItem(pyoArray.get(), i);
-#else
-        PyObject* item = PySequence_Fast_GET_ITEM(pyoArray.get(), i);
-#endif
+        PyObject* item = PyTuple_GetItem(pyoArray.get(), i);
         out.push_back(ToScalar(item));
     }
     return out;
@@ -79,22 +71,14 @@ std::vector<T> pyoToVector(
     T (*ToScalar)(PyObject*, ObjectType*))
 {
     PyObjectSP pyoArray = pyoShare(
-        PySequence_Fast(pyo, "Not a sequence"));
+        PySequence_Tuple(pyo));
     if (!pyoArray)
         throw PyException();
-#ifdef Py_LIMITED_API
-    Py_ssize_t size = PySequence_Size(pyoArray.get());
-#else
-    Py_ssize_t size = PySequence_Fast_GET_SIZE(pyoArray.get());
-#endif
+    Py_ssize_t size = PyTuple_Size(pyoArray.get());
     std::vector<T> out;
     for (Py_ssize_t i = 0; i < size; ++i)
     {
-#ifdef Py_LIMITED_API
-        PyObject* item = PySequence_GetItem(pyoArray.get(), i);
-#else
-        PyObject* item = PySequence_Fast_GET_ITEM(pyoArray.get(), i);
-#endif
+        PyObject* item = PyTuple_GetItem(pyoArray.get(), i);
         out.push_back(ToScalar(item, ot));
     }
     return out;

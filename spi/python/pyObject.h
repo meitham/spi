@@ -45,11 +45,18 @@ extern "C"
 {
 #endif
 
+#ifdef Py_TARGET_ABI3T
+    typedef PyObject SpiPyObject;
+#else
     typedef struct _SpiPyObject
     {
         PyObject_HEAD
         const SpiObject* obj;
     } SpiPyObject;
+#endif
+
+    /* Access only while holding PyBridgeLock. The setter takes ownership. */
+    SPI_PY_IMPORT void spi_py_object_assign(SpiPyObject* pyo, const SpiObject* obj);
 
     SPI_PY_IMPORT
     void spi_py_object_dealloc (SpiPyObject *pyo);

@@ -15,19 +15,73 @@ concurrency:
 
 jobs:
   build-test:
-    name: ${{ matrix.name }}
+    name: ${{ matrix.name }} / Python ${{ matrix.python }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022, macos-15]
+        python: ['3.9', '3.12', '3.14']
+        include:
+          - name: Linux
+            os: ubuntu-24.04
+            abi: Release-linux64
+          - name: Windows
+            os: windows-2022
+            abi: Release
+          - name: macOS
+            os: macos-15
+            abi: Release-macos64
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y build-essential libcurl4-openssl-dev uuid-dev
+      - name: Build and run tests
+        run: python ci/run.py ${{ matrix.python == '3.12' && '--python-tag 3-abi' || '' }}
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        if: matrix.python == '3.12'
+        with:
+          python-version: '3.13'
+      - name: Test the same abi3 binaries on Python 3.13
+        if: matrix.python == '3.12'
+        run: python ci/python_smoke.py --abi ${{ matrix.abi }} --python-tag 3-abi --thread-tests
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        if: matrix.python == '3.12'
+        with:
+          python-version: '3.14'
+      - name: Test the same abi3 binaries on Python 3.14
+        if: matrix.python == '3.12'
+        run: python ci/python_smoke.py --abi ${{ matrix.abi }} --python-tag 3-abi --thread-tests
+      - name: Upload build and test logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: test-results-${{ matrix.name }}-${{ matrix.python }}
+          path: test-results/
+          if-no-files-found: warn
+
+  abi3t:
+    name: abi3t / ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: Linux
             os: ubuntu-24.04
+            abi: Release-linux64
           - name: Windows
             os: windows-2022
+            abi: Release
           - name: macOS
             os: macos-15
+            abi: Release-macos64
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -36,12 +90,22 @@ jobs:
       - name: Install Linux build dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y build-essential libcurl4-openssl-dev uuid-dev
-      - name: Build and run tests
-        run: python ci/run.py
+      - name: Install Python 3.15.0 final
+        id: python315
+        run: python ci/install_python315.py
+      - name: Build abi3t and test with the GIL disabled
+        shell: bash
+        run: '"${{ steps.python315.outputs.threaded }}" ci/run.py --python-tag 3-abi3t'
+      - name: Test with the GIL enabled
+        shell: bash
+        run: '"${{ steps.python315.outputs.threaded }}" -X gil=1 ci/python_smoke.py --abi ${{ matrix.abi }} --python-tag 3-abi3t --thread-tests'
+      - name: Test the same binaries on regular Python
+        shell: bash
+        run: '"${{ steps.python315.outputs.regular }}" ci/python_smoke.py --abi ${{ matrix.abi }} --python-tag 3-abi3t --thread-tests'
       - name: Upload build and test logs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: test-results-${{ matrix.name }}
+          name: test-results-abi3t-${{ matrix.name }}
           path: test-results/
           if-no-files-found: warn

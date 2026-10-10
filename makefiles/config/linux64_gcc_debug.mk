@@ -26,7 +26,7 @@ G_CPPFLAGS = $(I_CFLAGS) $(U_LINUX64_CPPFLAGS) $(G_LINUX64_SANITIZER_FLAGS)
 # Linker flags 
 ############################################################################
 G_DEBUG_LFLAGS = $(G_LINUX64_SANITIZER_FLAGS)
-I_LFLAGS = -m64 -o $@ $(G_DEBUG_LFLAGS) $(U_LINUX64_DEBUG_LFLAGS) -Wl,-rpath,.
+I_LFLAGS = -m64 -o $@ $(G_DEBUG_LFLAGS) $(U_LINUX64_DEBUG_LFLAGS) -Wl,-rpath,'$$ORIGIN'
 
 ifndef U_PYTHON_BUILD
 I_FLAGS += -z defs

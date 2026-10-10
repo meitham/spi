@@ -423,7 +423,7 @@ ObjectConstSP PythonService::PythonMakeFromMap(
     PyObjectSP dict = pyObjectMapToDict(m, v2o);
     PyObjectSP args = pyoShare(PyTuple_New(1));
 
-    PyTuple_SetItem(args.get(), 0, dict.get());
+    PyTuple_SetItem(args.get(), 0, pyoRelease(dict));
 
     PyObjectSP output = pyoShare(PyObject_CallObject(method.get(), args.get()));
     if (!output)
@@ -555,7 +555,7 @@ namespace {
 /**
  * Register all the functions and classes from the library.
  */
-void PythonService::RegisterFunctions()
+void PythonService::RegisterFunctions(PyObject* module)
 {
 #if _DEBUG
     for (size_t i = 0; i < m_functions.size(); ++i)
@@ -570,7 +570,11 @@ void PythonService::RegisterFunctions()
     m_functions.push_back(sentinel);
 
 
-#if PY_MAJOR_VERSION >= 3
+#ifdef Py_TARGET_ABI3T
+    m_module = module;
+    if (!m_module || PyModule_AddFunctions(m_module, m_functions.data()) < 0)
+        throw PyException();
+#elif PY_MAJOR_VERSION >= 3
 
     m_moduleDef = {
         PyModuleDef_HEAD_INIT,
@@ -603,7 +607,11 @@ void PythonService::RegisterFunctions()
 
         pns.m_functions.push_back(sentinel);
 
-#if PY_MAJOR_VERSION >= 3
+#ifdef Py_TARGET_ABI3T
+        PyObject* module = PyModule_New(pns.m_ns);
+        if (!module || PyModule_AddFunctions(module, pns.m_functions.data()) < 0)
+            throw PyException();
+#elif PY_MAJOR_VERSION >= 3
         pns.m_moduleDef =
         {
             PyModuleDef_HEAD_INIT,
@@ -660,15 +668,14 @@ PyObject* PythonService::MakeObjectOfType(const Value& value)
 
     PyTypeObject* pto = FindCommonClass(className);
 
-    SpiPyObject* pyo = PyObject_New(SpiPyObject, pto);
+    SpiPyObject* pyo = (SpiPyObject*)PyType_GenericAlloc(pto, 0);
     if (!pyo)
     {
         PyErr_Format(PyExc_MemoryError, "Could not create Object.");
         throw spi::PyException();
     }
 
-    pyo->obj = obj.get();
-    pyo->obj->incRefCount();
+    spi_py_object_assign(pyo, spi::incRefCount(obj.get()));
 
     return (PyObject*)pyo;
 }

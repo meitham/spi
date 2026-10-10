@@ -25,7 +25,7 @@ G_CPPFLAGS = $(I_CFLAGS) $(U_LINUX64_CPPFLAGS)
 # Linker flags 
 ############################################################################
 G_OPTIMIZE_LFLAGS = 
-I_LFLAGS = -m64 -o$@ $(G_OPTIMIZE_LFLAGS) $(U_LINUX64_RELEASE_LFLAGS) -Wl,-rpath,.
+I_LFLAGS = -m64 -o$@ $(G_OPTIMIZE_LFLAGS) $(U_LINUX64_RELEASE_LFLAGS) -Wl,-rpath,'$$ORIGIN'
 
 ifndef U_PYTHON_BUILD
 I_LFLAGS += -z defs

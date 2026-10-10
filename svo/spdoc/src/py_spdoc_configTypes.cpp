@@ -41,6 +41,7 @@
 
 static int py_spdoc_DataType_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "DataType");
     try
@@ -48,7 +49,7 @@ static int py_spdoc_DataType_init(SpiPyObject* self, PyObject* args, PyObject* k
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::DataType::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::DataType::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -69,12 +70,14 @@ static int py_spdoc_DataType_init(SpiPyObject* self, PyObject* args, PyObject* k
 
 PyObject* py_spdoc_DataType_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("DataType", args);
     return pyo;
 }
 
 PyObject* py_spdoc_DataType_ValueType(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "DataType.ValueType");
     try
@@ -102,6 +105,7 @@ PyObject* py_spdoc_DataType_ValueType(PyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spdoc_DataType_RefType(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "DataType.RefType");
     try
@@ -181,6 +185,7 @@ static PyTypeObject* DataType_PyObjectType()
 
 static int py_spdoc_Attribute_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Attribute");
     try
@@ -188,7 +193,7 @@ static int py_spdoc_Attribute_init(SpiPyObject* self, PyObject* args, PyObject* 
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::Attribute::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::Attribute::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -209,12 +214,14 @@ static int py_spdoc_Attribute_init(SpiPyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spdoc_Attribute_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("Attribute", args);
     return pyo;
 }
 
 PyObject* py_spdoc_Attribute_encoding(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Attribute.encoding");
     try
@@ -292,6 +299,7 @@ static PyTypeObject* Attribute_PyObjectType()
 
 static int py_spdoc_ClassAttribute_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ClassAttribute");
     try
@@ -299,7 +307,7 @@ static int py_spdoc_ClassAttribute_init(SpiPyObject* self, PyObject* args, PyObj
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::ClassAttribute::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::ClassAttribute::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -320,12 +328,14 @@ static int py_spdoc_ClassAttribute_init(SpiPyObject* self, PyObject* args, PyObj
 
 PyObject* py_spdoc_ClassAttribute_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("ClassAttribute", args);
     return pyo;
 }
 
 PyObject* py_spdoc_ClassAttribute_encoding(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ClassAttribute.encoding");
     try
@@ -427,12 +437,14 @@ static int py_spdoc_Construct_init(SpiPyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spdoc_Construct_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("Construct", args);
     return pyo;
 }
 
 PyObject* py_spdoc_Construct_getType(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Construct.getType");
     try
@@ -460,6 +472,7 @@ PyObject* py_spdoc_Construct_getType(PyObject* self, PyObject* args, PyObject* k
 
 PyObject* py_spdoc_Construct_Summary(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Construct.Summary");
     try
@@ -518,6 +531,7 @@ static PyTypeObject* Construct_PyObjectType()
 
 static int py_spdoc_SimpleType_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "SimpleType");
     try
@@ -525,7 +539,7 @@ static int py_spdoc_SimpleType_init(SpiPyObject* self, PyObject* args, PyObject*
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::SimpleType::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::SimpleType::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -546,6 +560,7 @@ static int py_spdoc_SimpleType_init(SpiPyObject* self, PyObject* args, PyObject*
 
 PyObject* py_spdoc_SimpleType_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("SimpleType", args);
     return pyo;
 }
@@ -592,6 +607,7 @@ static PyTypeObject* SimpleType_PyObjectType()
 
 static int py_spdoc_Function_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Function");
     try
@@ -599,7 +615,7 @@ static int py_spdoc_Function_init(SpiPyObject* self, PyObject* args, PyObject* k
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::Function::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::Function::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -620,12 +636,14 @@ static int py_spdoc_Function_init(SpiPyObject* self, PyObject* args, PyObject* k
 
 PyObject* py_spdoc_Function_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("Function", args);
     return pyo;
 }
 
 PyObject* py_spdoc_Function_returnsObject(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Function.returnsObject");
     try
@@ -653,6 +671,7 @@ PyObject* py_spdoc_Function_returnsObject(PyObject* self, PyObject* args, PyObje
 
 PyObject* py_spdoc_Function_returns(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Function.returns");
     try
@@ -680,6 +699,7 @@ PyObject* py_spdoc_Function_returns(PyObject* self, PyObject* args, PyObject* kw
 
 PyObject* py_spdoc_Function_objectCount(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Function.objectCount");
     try
@@ -763,6 +783,7 @@ static PyTypeObject* Function_PyObjectType()
 
 static int py_spdoc_Enumerand_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Enumerand");
     try
@@ -770,7 +791,7 @@ static int py_spdoc_Enumerand_init(SpiPyObject* self, PyObject* args, PyObject* 
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::Enumerand::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::Enumerand::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -791,6 +812,7 @@ static int py_spdoc_Enumerand_init(SpiPyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spdoc_Enumerand_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("Enumerand", args);
     return pyo;
 }
@@ -835,6 +857,7 @@ static PyTypeObject* Enumerand_PyObjectType()
 
 static int py_spdoc_EnumConstructor_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "EnumConstructor");
     try
@@ -842,7 +865,7 @@ static int py_spdoc_EnumConstructor_init(SpiPyObject* self, PyObject* args, PyOb
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::EnumConstructor::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::EnumConstructor::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -863,6 +886,7 @@ static int py_spdoc_EnumConstructor_init(SpiPyObject* self, PyObject* args, PyOb
 
 PyObject* py_spdoc_EnumConstructor_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("EnumConstructor", args);
     return pyo;
 }
@@ -905,6 +929,7 @@ static PyTypeObject* EnumConstructor_PyObjectType()
 
 static int py_spdoc_Enum_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Enum");
     try
@@ -912,7 +937,7 @@ static int py_spdoc_Enum_init(SpiPyObject* self, PyObject* args, PyObject* kwarg
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::Enum::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::Enum::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -933,6 +958,7 @@ static int py_spdoc_Enum_init(SpiPyObject* self, PyObject* args, PyObject* kwarg
 
 PyObject* py_spdoc_Enum_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("Enum", args);
     return pyo;
 }
@@ -981,6 +1007,7 @@ static PyTypeObject* Enum_PyObjectType()
 
 static int py_spdoc_ClassMethod_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ClassMethod");
     try
@@ -988,7 +1015,7 @@ static int py_spdoc_ClassMethod_init(SpiPyObject* self, PyObject* args, PyObject
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::ClassMethod::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::ClassMethod::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -1009,12 +1036,14 @@ static int py_spdoc_ClassMethod_init(SpiPyObject* self, PyObject* args, PyObject
 
 PyObject* py_spdoc_ClassMethod_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("ClassMethod", args);
     return pyo;
 }
 
 PyObject* py_spdoc_ClassMethod_Summary(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "ClassMethod.Summary");
     try
@@ -1090,6 +1119,7 @@ static PyTypeObject* ClassMethod_PyObjectType()
 
 static int py_spdoc_CoerceFrom_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "CoerceFrom");
     try
@@ -1097,7 +1127,7 @@ static int py_spdoc_CoerceFrom_init(SpiPyObject* self, PyObject* args, PyObject*
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::CoerceFrom::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::CoerceFrom::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -1118,12 +1148,14 @@ static int py_spdoc_CoerceFrom_init(SpiPyObject* self, PyObject* args, PyObject*
 
 PyObject* py_spdoc_CoerceFrom_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("CoerceFrom", args);
     return pyo;
 }
 
 PyObject* py_spdoc_CoerceFrom_Summary(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "CoerceFrom.Summary");
     try
@@ -1189,6 +1221,7 @@ static PyTypeObject* CoerceFrom_PyObjectType()
 
 static int py_spdoc_CoerceTo_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "CoerceTo");
     try
@@ -1196,7 +1229,7 @@ static int py_spdoc_CoerceTo_init(SpiPyObject* self, PyObject* args, PyObject* k
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::CoerceTo::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::CoerceTo::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -1217,12 +1250,14 @@ static int py_spdoc_CoerceTo_init(SpiPyObject* self, PyObject* args, PyObject* k
 
 PyObject* py_spdoc_CoerceTo_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("CoerceTo", args);
     return pyo;
 }
 
 PyObject* py_spdoc_CoerceTo_Summary(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "CoerceTo.Summary");
     try
@@ -1290,6 +1325,7 @@ static PyTypeObject* CoerceTo_PyObjectType()
 
 static int py_spdoc_Class_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Class");
     try
@@ -1297,7 +1333,7 @@ static int py_spdoc_Class_init(SpiPyObject* self, PyObject* args, PyObject* kwar
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::Class::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::Class::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -1318,12 +1354,14 @@ static int py_spdoc_Class_init(SpiPyObject* self, PyObject* args, PyObject* kwar
 
 PyObject* py_spdoc_Class_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("Class", args);
     return pyo;
 }
 
 PyObject* py_spdoc_Class_ObjectName(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Class.ObjectName");
     try
@@ -1351,6 +1389,7 @@ PyObject* py_spdoc_Class_ObjectName(PyObject* self, PyObject* args, PyObject* kw
 
 PyObject* py_spdoc_Class_ServiceNamespace(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Class.ServiceNamespace");
     try
@@ -1450,6 +1489,7 @@ static PyTypeObject* Class_PyObjectType()
 
 static int py_spdoc_Module_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Module");
     try
@@ -1457,7 +1497,7 @@ static int py_spdoc_Module_init(SpiPyObject* self, PyObject* args, PyObject* kwa
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::Module::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::Module::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -1478,12 +1518,14 @@ static int py_spdoc_Module_init(SpiPyObject* self, PyObject* args, PyObject* kwa
 
 PyObject* py_spdoc_Module_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("Module", args);
     return pyo;
 }
 
 PyObject* py_spdoc_Module_combineSummaries(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Module.combineSummaries");
     try
@@ -1553,6 +1595,7 @@ static PyTypeObject* Module_PyObjectType()
 
 static int py_spdoc_Service_init(SpiPyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service");
     try
@@ -1560,7 +1603,7 @@ static int py_spdoc_Service_init(SpiPyObject* self, PyObject* args, PyObject* kw
         if (!func)
             func = get_function_caller(py_timer.Name());
 
-        self->obj = spi::pyInitConstObject(args, kwargs, func, &spdoc::Service::object_type);
+        spi_py_object_assign(self, spi::pyInitConstObject(args, kwargs, func, &spdoc::Service::object_type));
         return 0;
     }
     catch (spi::PyException&)
@@ -1581,12 +1624,14 @@ static int py_spdoc_Service_init(SpiPyObject* self, PyObject* args, PyObject* kw
 
 PyObject* py_spdoc_Service_Coerce(PyObject* self, PyObject* args)
 {
+    spi::PyBridgeLock bridgeLock;
     PyObject* pyo = get_python_service()->ObjectCoerce("Service", args);
     return pyo;
 }
 
 PyObject* py_spdoc_Service_CombineSharedServices(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.CombineSharedServices");
     try
@@ -1614,6 +1659,7 @@ PyObject* py_spdoc_Service_CombineSharedServices(PyObject* self, PyObject* args,
 
 PyObject* py_spdoc_Service_Summary(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.Summary");
     try
@@ -1641,6 +1687,7 @@ PyObject* py_spdoc_Service_Summary(PyObject* self, PyObject* args, PyObject* kwa
 
 PyObject* py_spdoc_Service_combineSummaries(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.combineSummaries");
     try
@@ -1668,6 +1715,7 @@ PyObject* py_spdoc_Service_combineSummaries(PyObject* self, PyObject* args, PyOb
 
 PyObject* py_spdoc_Service_getEnums(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.getEnums");
     try
@@ -1695,6 +1743,7 @@ PyObject* py_spdoc_Service_getEnums(PyObject* self, PyObject* args, PyObject* kw
 
 PyObject* py_spdoc_Service_getEnum(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.getEnum");
     try
@@ -1722,6 +1771,7 @@ PyObject* py_spdoc_Service_getEnum(PyObject* self, PyObject* args, PyObject* kwa
 
 PyObject* py_spdoc_Service_getEnumerands(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.getEnumerands");
     try
@@ -1749,6 +1799,7 @@ PyObject* py_spdoc_Service_getEnumerands(PyObject* self, PyObject* args, PyObjec
 
 PyObject* py_spdoc_Service_getClasses(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.getClasses");
     try
@@ -1776,6 +1827,7 @@ PyObject* py_spdoc_Service_getClasses(PyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spdoc_Service_getClass(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.getClass");
     try
@@ -1803,6 +1855,7 @@ PyObject* py_spdoc_Service_getClass(PyObject* self, PyObject* args, PyObject* kw
 
 PyObject* py_spdoc_Service_isSubClass(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.isSubClass");
     try
@@ -1830,6 +1883,7 @@ PyObject* py_spdoc_Service_isSubClass(PyObject* self, PyObject* args, PyObject* 
 
 PyObject* py_spdoc_Service_getPropertyClass(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.getPropertyClass");
     try
@@ -1857,6 +1911,7 @@ PyObject* py_spdoc_Service_getPropertyClass(PyObject* self, PyObject* args, PyOb
 
 PyObject* py_spdoc_Service_getConstructs(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.getConstructs");
     try
@@ -1884,6 +1939,7 @@ PyObject* py_spdoc_Service_getConstructs(PyObject* self, PyObject* args, PyObjec
 
 PyObject* py_spdoc_Service_getConstruct(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "Service.getConstruct");
     try

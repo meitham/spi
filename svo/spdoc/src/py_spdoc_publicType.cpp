@@ -41,6 +41,7 @@
 
 PyObject* py_spdoc_verifyPrimitiveTypeName(PyObject* self, PyObject* args, PyObject* kwargs)
 {
+    spi::PyBridgeLock bridgeLock;
     static spi::FunctionCaller* func = 0;
     spi::PythonTimer py_timer(get_python_service(), "verifyPrimitiveTypeName");
     try

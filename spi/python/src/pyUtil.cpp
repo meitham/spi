@@ -28,6 +28,7 @@
 */
 
 #include "../pyUtil.hpp"
+#include <mutex>
 #include "../pyInput.hpp"
 
 #include "pyVersion.hpp"
@@ -35,6 +36,37 @@
 #include <spi/Map.hpp>
 
 SPI_BEGIN_NAMESPACE
+
+#ifdef Py_TARGET_ABI3T
+namespace {
+    std::recursive_mutex& bridgeMutex()
+    {
+        // Keep alive through Python and C++ static teardown.
+        static std::recursive_mutex* mutex = new std::recursive_mutex;
+        return *mutex;
+    }
+}
+#endif
+
+PyBridgeLock::PyBridgeLock()
+{
+#ifdef Py_TARGET_ABI3T
+    if (!bridgeMutex().try_lock())
+    {
+        PyThreadState* state = PyEval_SaveThread();
+        bridgeMutex().lock();
+        PyEval_RestoreThread(state);
+    }
+#endif
+}
+
+PyBridgeLock::~PyBridgeLock()
+{
+#ifdef Py_TARGET_ABI3T
+    bridgeMutex().unlock();
+#endif
+}
+
 
 /**
  * Shares a newly allocated PyObject but does not increase the reference
@@ -179,9 +211,8 @@ void pyGetCaller(std::string* filename, int* lineno)
     }
 }
 
-PyInterpreterLock::PyInterpreterLock()
+PyInterpreterLock::PyInterpreterLock() : gstate(PyGILState_Ensure())
 {
-    gstate = PyGILState_Ensure();
 }
 
 PyInterpreterLock::~PyInterpreterLock()

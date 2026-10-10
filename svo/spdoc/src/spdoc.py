@@ -10,14 +10,13 @@ data is translated into the inner library.
 """
 
 import os
-
-cwd = os.getcwd()
+_dll_dir = (os.add_dll_directory(os.path.dirname(os.path.abspath(__file__)))
+            if hasattr(os, 'add_dll_directory') else None)
 try:
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    import sys
-    sys.path.insert(0, os.getcwd()) # needed by python3
-    try:
+    if __package__:
+        from .py_spdoc import *
+    else:
         from py_spdoc import *
-    finally: sys.path.pop(0)
-finally: os.chdir(cwd)
-
+finally:
+    if _dll_dir is not None: _dll_dir.close()
+del os, _dll_dir

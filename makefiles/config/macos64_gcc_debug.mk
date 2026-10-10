@@ -31,7 +31,7 @@ I_LFLAGS = $(G_MACOS64_GCC_M64) -o $@ $(G_DEBUG_LFLAGS) $(U_MACOS64_DEBUG_LFLAGS
 I_DLL_LFLAGS = -dynamiclib $(G_LINKMAP_SPEC)
 G_DLL_LFLAGS = $(I_LFLAGS) $(I_DLL_LFLAGS)
 G_DLL_LFLAGS += -rpath @loader_path
-G_EXE_LFLAGS = $(I_LFLAGS) 
+G_EXE_LFLAGS = $(I_LFLAGS) -rpath @loader_path
 
 ifdef U_PYTHON_BUILD
 I_LFLAGS+=-undefined dynamic_lookup

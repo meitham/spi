@@ -140,8 +140,10 @@ std::string PythonService::writePydHeaderFile(const std::string& dirname) const
          << "** Function called by Python to initialise the shared library.\n"
          << std::string(75, '*') << "\n"
          << "*/\n"
+         << "#ifdef Py_TARGET_ABI3T\n"
+         << "PyMODEXPORT_FUNC PyModExport_py_" << m_service->name << "(void);\n"
+         << "#elif PY_MAJOR_VERSION >= 3\n"
          << m_import << "\n"
-         << "#if PY_MAJOR_VERSION >= 3\n"
          << "PyObject* PyInit_py_" << m_service->name << "(void);\n"
          << "#else\n"
          << "void initpy_" << m_service->name << "(void);\n"
@@ -192,12 +194,14 @@ std::string PythonService::writePydSourceFile(const std::string& dirname) const
          << "\n"
          << "spi::FunctionCaller* get_function_caller(const char* name)\n"
          << "{\n"
-         << "    return theService->GetFunctionCaller(name);\n"
+         << "    spi::PyBridgeLock bridgeLock;\n"
+            << "    return theService->GetFunctionCaller(name);\n"
          << "}\n"
          << "\n"
          << "spi::InputContext* get_input_context()\n"
          << "{\n"
-         << "    return theService->GetInputContext();\n"
+         << "    spi::PyBridgeLock bridgeLock;\n"
+            << "    return theService->GetInputContext();\n"
          << "}\n"
          << "\n"
 
@@ -224,6 +228,7 @@ std::string PythonService::writePydSourceFile(const std::string& dirname) const
             << "PyObject* py_" << m_service->ns << "_help_func(\n"
             << "    PyObject* self, PyObject* args)\n"
             << "{\n"
+            << "    spi::PyBridgeLock bridgeLock;\n"
             << "    return theService->HelpFunc(args);\n"
             << "}\n"
             << "\n";
@@ -233,7 +238,8 @@ std::string PythonService::writePydSourceFile(const std::string& dirname) const
             ostr << "PyObject* py_" << m_service->ns << "_help_func_list(\n"
                 << "    PyObject* self, PyObject* args)\n"
                 << "{\n"
-                << "    return theService->HelpFunc(NULL);\n"
+                << "    spi::PyBridgeLock bridgeLock;\n"
+            << "    return theService->HelpFunc(NULL);\n"
                 << "}\n"
                 << "\n";
         }
@@ -241,12 +247,14 @@ std::string PythonService::writePydSourceFile(const std::string& dirname) const
         ostr << "PyObject* py_" << m_service->ns << "_help_enum(\n"
             << "    PyObject* self, PyObject* args)\n"
             << "{\n"
+            << "    spi::PyBridgeLock bridgeLock;\n"
             << "    return theService->HelpEnum(args);\n"
             << "}\n"
             << "\n"
             << "PyObject* py_" << m_service->ns << "_object_coerce(\n"
             << "    PyObject* self, PyObject* args)\n"
             << "{\n"
+            << "    spi::PyBridgeLock bridgeLock;\n"
             << "    return theService->ObjectCoerce(args);\n"
             << "}\n";
 
@@ -256,13 +264,15 @@ std::string PythonService::writePydSourceFile(const std::string& dirname) const
                 << "PyObject* py_" << m_service->ns << "_start_logging(\n"
                 << "    PyObject* self, PyObject* args)\n"
                 << "{\n"
-                << "    return theService->StartLogging(args);\n"
+                << "    spi::PyBridgeLock bridgeLock;\n"
+            << "    return theService->StartLogging(args);\n"
                 << "}\n"
                 << "\n"
                 << "PyObject* py_" << m_service->ns << "_stop_logging(\n"
                 << "    PyObject*self, PyObject* args)\n"
                 << "{\n"
-                << "    return theService->StopLogging();\n"
+                << "    spi::PyBridgeLock bridgeLock;\n"
+            << "    return theService->StopLogging();\n"
                 << "}\n";
         }
 
@@ -270,24 +280,28 @@ std::string PythonService::writePydSourceFile(const std::string& dirname) const
             << "PyObject* py_" << m_service->ns << "_start_timing(\n"
             << "    PyObject* self, PyObject* args)\n"
             << "{\n"
+            << "    spi::PyBridgeLock bridgeLock;\n"
             << "    return theService->StartTiming();\n"
             << "}\n"
             << "\n"
             << "PyObject* py_" << m_service->ns << "_stop_timing(\n"
             << "    PyObject*self, PyObject* args)\n"
             << "{\n"
+            << "    spi::PyBridgeLock bridgeLock;\n"
             << "    return theService->StopTiming();\n"
             << "}\n"
             << "\n"
             << "PyObject* py_" << m_service->ns << "_clear_timings(\n"
             << "    PyObject* self, PyObject* args)\n"
             << "{\n"
+            << "    spi::PyBridgeLock bridgeLock;\n"
             << "    return theService->ClearTimings();\n"
             << "}\n"
             << "\n"
             << "PyObject* py_" << m_service->ns << "_get_timings(\n"
             << "    PyObject*self, PyObject* args)\n"
             << "{\n"
+            << "    spi::PyBridgeLock bridgeLock;\n"
             << "    return theService->GetTimings();\n"
             << "}\n"
             << "\n"
@@ -300,13 +314,22 @@ std::string PythonService::writePydSourceFile(const std::string& dirname) const
         << "** Standard Python initialisation function.\n"
         << std::string(75, '*') << "\n"
         << "*/\n"
-        << "#if PY_MAJOR_VERSION >= 3\n"
+        << "#ifdef Py_TARGET_ABI3T\n"
+        << "static int exec_module(PyObject* module)\n"
+        << "#elif PY_MAJOR_VERSION >= 3\n"
         << "PyObject* PyInit_py_" << m_service->name << "(void)\n"
         << "#else\n"
         << "void initpy_" << m_service->name << "(void)\n"
         << "#endif\n"
         << "{\n"
+        << "    spi::PyBridgeLock bridgeLock;\n"
         << "  try {\n"
+        << "#ifdef Py_TARGET_ABI3T\n"
+        << "    if (theService) {\n"
+        << "        PyErr_SetString(PyExc_ImportError, \"SPI modules can only be loaded once per process\");\n"
+        << "        return -1;\n"
+        << "    }\n"
+        << "#endif\n"
         << "    spi::CommonRuntime::AddContext(\"PYTHON\");\n"
         // perhaps we could check an environment variable to see whether we
         // want to "enter to continue" at start-up time - this variable can
@@ -442,28 +465,51 @@ std::string PythonService::writePydSourceFile(const std::string& dirname) const
     }
 
     ostr << "\n"
+         << "#ifdef Py_TARGET_ABI3T\n"
+         << "    svc->RegisterFunctions(module);\n"
+         << "    return 0;\n"
+         << "#else\n"
          << "    svc->RegisterFunctions();\n"
          << "#if PY_MAJOR_VERSION >= 3\n"
          << "    PyObject* module = svc->GetPythonModule();\n"
          << "    return module;\n"
          << "#endif\n"
+         << "#endif\n"
          << "  }\n"
          << "  catch (std::exception& e)\n"
          << "  {\n"
          << "    spi::pyExceptionHandler(e.what());\n"
-         << "#if PY_MAJOR_VERSION >= 3\n"
+         << "#ifdef Py_TARGET_ABI3T\n"
+         << "    return -1;\n"
+         << "#elif PY_MAJOR_VERSION >= 3\n"
          << "    return NULL;\n"
          << "#endif\n"
          << "  }\n"
          << "  catch (...)\n"
          << "  {\n"
          << "    spi::pyExceptionHandler(\"Unknown exception\");\n"
-         << "#if PY_MAJOR_VERSION >= 3\n"
+         << "#ifdef Py_TARGET_ABI3T\n"
+         << "    return -1;\n"
+         << "#elif PY_MAJOR_VERSION >= 3\n"
          << "    return NULL;\n"
          << "#endif\n"
          << "  }\n"
          << "}\n"
          << "\n";
+
+    ostr << "#ifdef Py_TARGET_ABI3T\n"
+         << "PyABIInfo_VAR(abi_info);\n"
+         << "static PySlot module_slots[] = {\n"
+         << "    PySlot_PTR_STATIC(Py_mod_abi, &abi_info),\n"
+         << "    PySlot_PTR_STATIC(Py_mod_name, \"py_" << m_service->name << "\"),\n"
+         << "    PySlot_PTR(Py_mod_exec, exec_module),\n"
+         << "    PySlot_PTR(Py_mod_gil, Py_MOD_GIL_NOT_USED),\n"
+         << "    PySlot_PTR(Py_mod_multiple_interpreters, Py_MOD_MULTIPLE_INTERPRETERS_NOT_SUPPORTED),\n"
+         << "    PySlot_END\n"
+         << "};\n"
+         << "PyMODEXPORT_FUNC PyModExport_py_" << m_service->name << "(void)\n"
+         << "{\n    return module_slots;\n}\n"
+         << "#endif\n";
 
 
     endSourceFile(ostr, filename);
@@ -494,27 +540,18 @@ std::string PythonService::writePyImporter(const std::string& dirname) const
     ostr << "\"\"\"\n"
          << "\n";
 
-    // this might be futile for non-windows platforms
-    //
-    // we change to the directory containing the shared library before trying
-    // to import it
-    //
-    // we also found that for Python3 we need to put the current directory in the
-    // path since otherwise it won't find the shared library - this is an annoying
-    // difference but doesn't seem to be a major problem for Python2
-
+    // Resolve sibling modules without changing the process working directory.
     ostr << "import os\n"
-        << "\n"
-        << "cwd = os.getcwd()\n"
-        << "try:\n"
-        << "    os.chdir(os.path.dirname(os.path.abspath(__file__)))\n"
-        << "    import sys\n"
-        << "    sys.path.insert(0, os.getcwd()) # needed by python3\n"
-        << "    try:\n"
-        << "        from py_" << m_service->name << " import *\n"
-        << "    finally: sys.path.pop(0)\n"
-        << "finally: os.chdir(cwd)\n"
-        << "\n";
+         << "_dll_dir = (os.add_dll_directory(os.path.dirname(os.path.abspath(__file__)))\n"
+         << "            if hasattr(os, 'add_dll_directory') else None)\n"
+         << "try:\n"
+         << "    if __package__:\n"
+         << "        from .py_" << m_service->name << " import *\n"
+         << "    else:\n"
+         << "        from py_" << m_service->name << " import *\n"
+         << "finally:\n"
+         << "    if _dll_dir is not None: _dll_dir.close()\n"
+         << "del os, _dll_dir\n";
 
     ostr.close();
     return filename;
@@ -812,7 +849,8 @@ void PythonModule::implementFunction(
     ostr << ")\n";
 
     ostr << "{\n"
-        << "    static spi::FunctionCaller* func = 0;\n"
+        << "    spi::PyBridgeLock bridgeLock;\n"
+            << "    static spi::FunctionCaller* func = 0;\n"
         << "    spi::PythonTimer py_timer(get_python_service(), "
         << "\"" << makeNamespaceSep(module->ns, ".") << func->name << "\");\n";
 
@@ -1237,6 +1275,7 @@ void PythonModule::implementClass(
             ostr << ", PyObject* kwds"; // but these are ignored
         ostr << ")\n";
         ostr << "{\n"
+            << "    spi::PyBridgeLock bridgeLock;\n"
             << "    static spi::FunctionCaller* func = 0;\n"
             << "    spi::PythonTimer py_timer(get_python_service(), \"" << classname << "\");\n"
             << "    try\n"
@@ -1244,12 +1283,12 @@ void PythonModule::implementClass(
             << "        if (!func)\n"
             << "            func = get_function_caller(py_timer.Name());\n"
             << "\n"
-            << "        self->obj = spi::pyInitConstObject(args";
+            << "        spi_py_object_assign(self, spi::pyInitConstObject(args";
 
         if (service->options.keywords)
             ostr << ", kwargs";
 
-        ostr << ", func, &" << cppTypename << "::object_type);\n"
+        ostr << ", func, &" << cppTypename << "::object_type));\n"
              << "        return 0;\n";
 
         writeExceptionHandling(ostr, service, true);
@@ -1278,6 +1317,7 @@ void PythonModule::implementClass(
          << makeNamespaceSep(module->ns, "_") << cls->name << "_Coerce"
          << "(PyObject* self, PyObject* args)\n"
          << "{\n"
+         << "    spi::PyBridgeLock bridgeLock;\n"
          << "    PyObject* pyo = get_python_service()->ObjectCoerce(\""
          << cls->ObjectName() << "\", args);\n"
          << "    return pyo;\n"
@@ -1310,7 +1350,8 @@ void PythonModule::implementClass(
 
         ostr << ")\n"
              << "{\n"
-             << "    static spi::FunctionCaller* func = 0;\n"
+             << "    spi::PyBridgeLock bridgeLock;\n"
+            << "    static spi::FunctionCaller* func = 0;\n"
              << "    spi::PythonTimer py_timer(get_python_service(), "
              << "\"" << makeNamespaceSep(module->ns, ".") << cls->name
              << "." << method->function->name << "\");\n"

@@ -60,8 +60,10 @@ extern "C"
 ** Function called by Python to initialise the shared library.
 ***************************************************************************
 */
+#ifdef Py_TARGET_ABI3T
+PyMODEXPORT_FUNC PyModExport_py_spdoc(void);
+#elif PY_MAJOR_VERSION >= 3
 PY_SPI_IMPORT
-#if PY_MAJOR_VERSION >= 3
 PyObject* PyInit_py_spdoc(void);
 #else
 void initpy_spdoc(void);

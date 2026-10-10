@@ -36,7 +36,8 @@ def configuration(python_tag):
         tag = python_tag or (version.replace('.', '') if sys.platform == 'win32' else version)
         output.write("tag=%s\n" % tag)
         args = [f'SARTORIAL_CONFIG={config}', f'PY_VERSION={tag}',
-                f'G_PYTHON={Path(sys.executable).as_posix()}']
+                f'G_PYTHON={Path(sys.executable).as_posix()}',
+                f'G_PYTHON_INCLUDES=-I{Path(sysconfig.get_path("include")).as_posix()}']
         make = 'make'
         if sys.platform == 'win32':
             cygwin = ROOT / 'makefiles/cygwin64/bin'
@@ -44,6 +45,8 @@ def configuration(python_tag):
             make = str(cygwin / 'make.exe')
             args.append("COMPILER=msvc17")
             args.append("G_NO_MAKE_XLADDIN=1")
+            args.append(f'G_PYTHON_LIBS={Path(sys.base_prefix).as_posix()}/libs/python'
+                        + {'3-abi': '3', '3-abi3t': '3t'}.get(tag, tag) + '.lib')
             with contextlib.redirect_stdout(output):
                 args += vsVersions.get_contents()
             abi = 'Release'
@@ -147,7 +150,7 @@ def main():
 
     create_site_mk(args)
 
-    command = [make, f'-j{opts.jobs}', '-s']
+    command = [make, f'-j{opts.jobs}', '-s', *args]
 
     start_time = datetime.datetime.now()
 
@@ -170,11 +173,14 @@ def main():
 
         for source in sorted((ROOT / 'test').glob('test*.cpp')):
             if not run(source.stem + '-build',
-                   [make, '-j1', '-C', 'test', 'run', 'NAME=' + source.stem], 120, env=test_env):
+                   [make, '-j1', *args, '-C', 'test', 'run', 'NAME=' + source.stem], 120, env=test_env):
                 return 1
 
     if not run('python-smoke', [sys.executable, str(ROOT / 'ci/python_smoke.py'),
-                                '--root', str(ROOT), '--abi', abi, '--python-tag', tag], 60):
+                                '--root', str(ROOT), '--abi', abi, '--python-tag', tag,
+                                '--thread-tests',
+                                *(['--require-free-threaded'] if tag == '3-abi3t'
+                                  and sysconfig.get_config_var('Py_GIL_DISABLED') else [])], 180):
         failures.append('python-smoke')
 
     remove_site_mk()
